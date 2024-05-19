@@ -21,9 +21,9 @@ color_seleccionado = 0
 
 # ---- Definiendo posiciones específicas para los colores ----
 posiciones_colores = [
-    (120, 50), (120, 130), (790, 50), (790, 130),
-    (790, 210), (790, 290), (790, 370), (790, 450),
-    (790, 530), (790, 610)
+    (100, 50), (100, 130), (810, 50), (810, 130),
+    (810, 210), (810, 290), (810, 370), (810, 450),
+    (810, 530), (810, 610)
 ]
 
 # ----------------------------------- Iniciando la Ventana Principal -----------------------------------
@@ -46,7 +46,7 @@ def screenPrincipal():
             elif event.type == pygame.MOUSEBUTTONDOWN:  #Detectar clic del mouse
                 if (event.button == 1):  #Verificar si fue clic izquierdo
                     x, y = event.pos  #Guardando en variables donde se hizo clic
-                    # Verificar si el clic fue dentro de alguno de los botones de la Ventana Principal
+                    #Verificar si el clic fue dentro de alguno de los botones de la Ventana Principal
                     if posicionBotonInicio.collidepoint(event.pos):  #Botón de Inicio
                         screenEditor()  #Ir a ventana de edición
         pygame.display.flip()
@@ -61,10 +61,15 @@ def screenEditor():
     
     # ---- Botón de Regreso ----
     botonRegreso = pygame.image.load("Imagenes//BotonRegreso.png")  #Agregando Imagen representativa de botón de regreso
-    botonRegreso = pygame.transform.scale(botonRegreso, (60, 60))  #Ajustando el tamaño
+    botonRegreso = pygame.transform.scale(botonRegreso, (40, 40))  #Ajustando el tamaño
     posicionBotonRegreso = ventanaEditor.blit(botonRegreso, (10, 10))  #Visualizar la imagen con su posición
 
-    # ---- Dibujar paleta de colores ----
+    # ---- Botón de Rotación ----
+    botonRotar = pygame.image.load("Imagenes//rotacion.png")  #Agregando Imagen representativa de botón de rotación
+    botonRotar = pygame.transform.scale(botonRotar, (45, 45))  #Ajustando el tamaño
+    posicionBotonRotar = ventanaEditor.blit(botonRotar, (98, 210))  #Visualizar la imagen con su posición
+
+    # ---- Dibujando paleta de colores ----
     def dibujar_paleta(ventana, colores, posiciones):
         for i, (color, pos) in enumerate(zip(colores, posiciones)):
             pygame.draw.rect(ventana, color, (*pos, 40, 40))
@@ -81,12 +86,16 @@ def screenEditor():
                 pygame.draw.rect(ventana, color, (x1, y1, tamaño_celda, tamaño_celda))
                 pygame.draw.rect(ventana, pygame.Color("#000000"), (x1, y1, tamaño_celda, tamaño_celda), 1)
     
+    # ---- Función para rotar la cuadrícula ----
+    def rotar_cuadricula(matriz):
+        return [list(reversed(col)) for col in zip(*matriz)]
+
     # ---- Variables de la cuadrícula ----
-    num_celdas = 120
-    tamaño_celda = 5
+    num_celdas = 80
+    tamaño_celda = 8
     offset_x = (sizeScreen[0] - num_celdas * tamaño_celda) // 2  #Centrar horizontalmente
     offset_y = (sizeScreen[1] - num_celdas * tamaño_celda) // 2  #Centrar verticalmente
-    color_blanco = 8  #Índice del color blanco en la lista `colores`
+    color_blanco = 8  #Índice del color blanco en la lista colores
     colores_celdas = [[color_blanco for _ in range(num_celdas)] for _ in range(num_celdas)]
     
     # ---- Bucle de Ventana Editor ----
@@ -103,22 +112,29 @@ def screenEditor():
                         celda_x = (x - offset_x) // tamaño_celda
                         celda_y = (y - offset_y) // tamaño_celda
                         colores_celdas[celda_x][celda_y] = color_seleccionado
-            elif event.type == pygame.MOUSEBUTTONDOWN:  #Detectar clic del mouse
+            elif event.type == pygame.MOUSEBUTTONDOWN:  # Detectar clic del mouse
                 if (event.button == 1):  #Verificar si fue clic izquierdo
                     x, y = event.pos  #Guardar en variables donde se hizo clic
                     if(posicionBotonRegreso.collidepoint(event.pos)):
+                        print("Botón de regreso presionado")
                         screenPrincipal()
+                    elif(posicionBotonRotar.collidepoint(event.pos)):
+                        print("Botón de rotación presionado")
+                        colores_celdas = rotar_cuadricula(colores_celdas)
+                        print("Cuadrícula rotada")
                     # ---- Verificar si el clic fue dentro de alguno de los botones de la paleta de colores ----
                     for i, pos in enumerate(posiciones_colores):
                         if pos[0] <= x < pos[0] + 40 and pos[1] <= y < pos[1] + 40:
                             color_seleccionado = i
 
-        # ---- Redibujar la cuadrícula y la paleta en cada iteración del bucle ----
+        # ---- Redibujando la cuadrícula y la paleta en cada iteración del bucle ----
         ventanaEditor.fill("#FFFFFF")
         dibujar_cuadricula(ventanaEditor, num_celdas, tamaño_celda, offset_x, offset_y, colores_celdas)
-        dibujar_paleta(ventanaEditor, colores, posiciones_colores)  #Paleta de colores en posiciones específicas
+        dibujar_paleta(ventanaEditor, colores, posiciones_colores)  # Paleta de colores en posiciones específicas
         ventanaEditor.blit(botonRegreso, (10, 10))
+        ventanaEditor.blit(botonRotar, (98, 210))
         pygame.display.flip()
 # ----------------------------------- Finalizando la Ventana Editor -----------------------------------
 screenPrincipal()
 pygame.quit()
+
