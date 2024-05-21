@@ -55,13 +55,16 @@ def screenPrincipal():
                     if posicionBotonInicio.collidepoint(event.pos):  #Botón de Inicio
                         screenEditor()  #Ir a ventana de edición
                     if posicionbotonASCII.collidepoint(event.pos):#Botón de ASCII
-                        screenASCII()
+                          
+
+                        screenASCII()       
+
         pygame.display.flip()
 # ----------------------------------- Finalizando la Ventana Principal -----------------------------------
 
 # ----------------------------------- Iniciando la Ventana Editor -----------------------------------
 def screenEditor():
-    global color_seleccionado
+    global color_seleccionado, colores_celdas
     
     ventanaEditor = pygame.display.set_mode(sizeScreen)  #Creando Ventana
     ventanaEditor.fill("#FFFFFF") #Agregando color de fondo
@@ -177,7 +180,11 @@ def screenEditor():
 # ----------------------------------- Finalizando la Ventana Editor ------------------------------------
 
 #----------------------------------funcion que transforma el dibujo en ascii----------------------------
-def screenASCII():
+def screenASCII():                        
+    file = open("guardados.txt", "r")                        
+    matrizGuardada=file.readline()
+    file.close()
+    print(matrizGuardada)
     ventanaASCII = pygame.display.set_mode(sizeScreen)  #Creando Ventana
     ventanaASCII.fill("#FFFFFF") #Agregando color de fondo
     ventanaASCIIStatus=True
@@ -187,6 +194,32 @@ def screenASCII():
     botonRegreso = pygame.transform.scale(botonRegreso, (40, 40))  #Ajustando el tamaño
     posicionBotonRegreso = ventanaASCII.blit(botonRegreso, (10, 10))  #Visualizar la imagen con su posición
 
+
+    def transfomarASCII(matriz):
+        for i in range(len(matriz)):
+            for j in range(len(matriz[i])):
+                    if matriz[i][j]==0:
+                        matriz[i][j]=' '
+                    if matriz[i][j]==1:
+                        matriz[i][j]='.'
+                    if matriz[i][j]==2:
+                        matriz[i][j]=':'
+                    if matriz[i][j]==3:
+                        matriz[i][j]='-'
+                    if matriz[i][j]==4:
+                        matriz[i][j]='='
+                    if matriz[i][j]==5:
+                        matriz[i][j]='!'
+                    if matriz[i][j]==6:
+                        matriz[i][j]='&'
+                    if matriz[i][j]==7:
+                        matriz[i][j]='$'
+                    if matriz[i][j]==8:
+                        matriz[i][j]='% '       
+                    if matriz[i][j]==9:
+                        matriz[i][j]='@'
+        return matriz
+
     # ---- Bucle de Ventana Editor ----
     while ventanaASCIIStatus:
         
@@ -194,24 +227,17 @@ def screenASCII():
             if event.type == pygame.QUIT:  #Si el usuario intenta cerrar ventana
                 pygame.quit()  #Saliendo del juego
                 sys.exit()
-            if event.type == pygame.MOUSEMOTION:  #Detectar movimiento del mouse
-                if pygame.mouse.get_pressed()[0]:  #Verificar si el botón izquierdo del mouse está presionado
-                    x, y = event.pos  #Guardar la posición del mouse
+
             if event.type == pygame.MOUSEBUTTONDOWN:  # Detectar clic del mouse
                 if (event.button == 1):  #Verificar si fue clic izquierdo
                     x, y = event.pos  #Guardar en variables donde se hizo clic
                     
                     if(posicionBotonRegreso.collidepoint(event.pos)):
-                        print("Botón de regreso presionado")
-                        ventanaEditorStatus=False
+                        ventanaASCIIStatus=False
                         screenPrincipal()
-                        # matrizASCII=transfomarASCII(colores_celdas.copy())
-                        # print(matrizASCII)
-                    
-                    # ---- Verificar si el clic fue dentro de alguno de los botones de la paleta de colores ----
-                    for i, pos in enumerate(posiciones_colores):
-                        if pos[0] <= x < pos[0] + 40 and pos[1] <= y < pos[1] + 40:
-                            color_seleccionado = i
+                    matrizASCII=transfomarASCII(matrizGuardada)
+                    print(matrizASCII)
+
                             
 
         # ---- Redibujando la cuadrícula y la paleta en cada iteración del bucle ----
@@ -219,31 +245,7 @@ def screenASCII():
         ventanaASCII.blit(botonRegreso, (10, 10))
         pygame.display.flip()
 
-def transfomarASCII(matrix):
-    matriz=matrix
-    for i in range(len(matriz)):
-      for j in range(len(matriz[i])):
-            if matriz[i][j]==0:
-                  matriz[i][j]=' '
-            if matriz[i][j]==1:
-                  matriz[i][j]='.'
-            if matriz[i][j]==2:
-                  matriz[i][j]=':'
-            if matriz[i][j]==3:
-                  matriz[i][j]='-'
-            if matriz[i][j]==4:
-                  matriz[i][j]='='
-            if matriz[i][j]==5:
-                  matriz[i][j]='!'
-            if matriz[i][j]==6:
-                  matriz[i][j]='&'
-            if matriz[i][j]==7:
-                  matriz[i][j]='$'
-            if matriz[i][j]==8:
-                  matriz[i][j]='% '       
-            if matriz[i][j]==9:
-                  matriz[i][j]='@'
-    print(matrix)
+
 
 
 
