@@ -151,8 +151,8 @@ def screenEditor():
                     elif(posicionbotonZoomOut.collidepoint(event.pos)):
                         tamaño_celda=int(tamaño_celda*0.8)
                     elif(posicionbotonGuardar.collidepoint(event.pos)):
-                        file=open("guardados.txt", "w+")
-                        file.write("hola")
+                        file=open("guardados.txt", "w")
+                        file.write(f"{colores_celdas}")
                         file.close()
                         
 
