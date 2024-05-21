@@ -219,6 +219,9 @@ def screenASCII():
                     if matriz[i][j]==9:
                         matriz[i][j]='@'
         return matriz
+    
+    matrizASCII=transfomarASCII(matrizGuardada)
+    print(matrizASCII)
 
     # ---- Bucle de Ventana Editor ----
     while ventanaASCIIStatus:
@@ -235,8 +238,8 @@ def screenASCII():
                     if(posicionBotonRegreso.collidepoint(event.pos)):
                         ventanaASCIIStatus=False
                         screenPrincipal()
-                    matrizASCII=transfomarASCII(matrizGuardada)
-                    print(matrizASCII)
+                    
+                    
 
                             
 
