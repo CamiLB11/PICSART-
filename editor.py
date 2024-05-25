@@ -1,6 +1,8 @@
+import sys
+
 import pygame
 from pygame import *
-import sys
+
 #from buttons import *
 
 pygame.init()
@@ -72,21 +74,21 @@ def draw(screen):
 
 
 def dibujar_paleta(ventana, colores, posiciones):
-        for i, (color, pos) in enumerate(zip(colores, posiciones)):
-            pygame.draw.rect(ventana, color, (*pos, 40, 40))
-            if (i == color_seleccionado):
-                pygame.draw.rect(ventana, pygame.Color("#000000"), (*pos, 40, 40), 2)
+            for i, (color, pos) in enumerate(zip(colores, posiciones)):
+                  pygame.draw.rect(ventana, color, (*pos, 40, 40))
+                  if (i == color_seleccionado):
+                        pygame.draw.rect(ventana, pygame.Color("#000000"), (*pos, 40, 40), 2)
 
 
 # ---- Función para dibujar la cuadrícula ----
 def dibujar_cuadricula(ventana, num_celdas, tamaño_celda, offset_x, offset_y, colores_celdas):
       for i in range(num_celdas):
             for j in range(num_celdas):
-                x1 = offset_x + i * tamaño_celda
-                y1 = offset_y + j * tamaño_celda
-                color = colores[colores_celdas[i][j]]
-                pygame.draw.rect(ventana, color, (x1, y1, tamaño_celda, tamaño_celda))
-                pygame.draw.rect(ventana, pygame.Color("#000000"), (x1, y1, tamaño_celda, tamaño_celda), 1)
+                  x1 = offset_x + i * tamaño_celda
+                  y1 = offset_y + j * tamaño_celda
+                  color = colores[colores_celdas[i][j]]
+                  pygame.draw.rect(ventana, color, (x1, y1, tamaño_celda, tamaño_celda))
+                  pygame.draw.rect(ventana, pygame.Color("#000000"), (x1, y1, tamaño_celda, tamaño_celda), 1)
 
 num_celdas = 80
 tamaño_celda = 8
@@ -97,18 +99,19 @@ colores_celdas = [[color_blanco for _ in range(num_celdas)] for _ in range(num_c
 
 # ---- Definiendo colores ----
 colores = [
-    pygame.Color("#E6E3E3"),pygame.Color("#FFE73A"), pygame.Color("#73FF3A"), pygame.Color("#3AFFD8"), pygame.Color("#3A3DFF"), 
-    pygame.Color("#943AFF"), pygame.Color("#FF3AC9"), pygame.Color("#FF3A3A"), pygame.Color("#FF9F3A"), 
-    pygame.Color("#000000")
+      pygame.Color("#E6E3E3"),pygame.Color("#FFE73A"), pygame.Color("#73FF3A"), pygame.Color("#3AFFD8"), pygame.Color("#3A3DFF"),
+      pygame.Color("#943AFF"), pygame.Color("#FF3AC9"), pygame.Color("#FF3A3A"), pygame.Color("#FF9F3A"),
+      pygame.Color("#000000")
 ]
 color_seleccionado = 0
 
 # ---- Definiendo posiciones específicas para los colores ----
 posiciones_colores = [
-    (100, 50), (100, 130), (810, 50), (810, 130),
-    (810, 210), (810, 290), (810, 370), (810, 450),
-    (810, 530), (810, 610)
+      (100, 50), (100, 130), (50, 50), (100, 210),
+      (50, 210), (50, 290), (50, 370), (100, 290),
+      (100, 370), (50, 130)
 ]
+
 
 
 def main():
@@ -133,7 +136,7 @@ def main():
                         #Verificar si el clic fue dentro de alguno de los botones de la Ventana Principal
                               if posicionBotonInicio.collidepoint(event.pos):
                                     #Botón de Inicio
-                                    ventanaPrincipalCorriendo = False 
+                                    ventanaPrincipalCorriendo = False
                                     screenEditorCorriendo = True
                                     print('ventana editor') #Ir a ventana de edición
             
@@ -146,12 +149,16 @@ def main():
                   botonRegreso = pygame.transform.scale(botonRegreso, (40, 40))  #Ajustando el tamaño
                   posicionBotonRegreso = screen.blit(botonRegreso, (10, 10))  #Visualizar la imagen con su posición
 
-                  # ---- Botón de Rotación ----
-                  botonRotar = pygame.image.load("Imagenes//rotacion.png")  #Agregando Imagen representativa de botón de rotación
-                  botonRotar = pygame.transform.scale(botonRotar, (45, 45))  #Ajustando el tamaño
-                  posicionBotonRotar = screen.blit(botonRotar, (98, 210))  #Visualizar la imagen con su posición
+                  # ---- Botón de Rotación Derecha ----
+                  botonRotarDer = pygame.image.load("Imagenes//rot-der.png")  # Agregando Imagen representativa de botón de rotación
+                  botonRotarDer = pygame.transform.scale(botonRotarDer, (45, 45))  # Ajustando el tamaño
+                  posicionBotonRotarDerecha = screen.blit(botonRotarDer, (50, 450))  # Visualizar la imagen con su posición
                   #dibujar_paleta(screen,colores,posiciones_colores )
-
+                  
+                  # ---- Botón de Rotación Izquierda ----
+                  botonRotarIz = pygame.image.load("Imagenes//rot-iz.png")  # Agregando Imagen representativa de botón de rotación
+                  botonRotarIz = pygame.transform.scale(botonRotarIz, (45, 45))  # Ajustando el tamaño
+                  posicionBotonRotarIzquierda = screen.blit(botonRotarIz, (100, 450))  # Visualizar la imagen con su posición
 
             pygame.display.flip()
 
