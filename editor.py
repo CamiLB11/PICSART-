@@ -1,166 +1,138 @@
-import sys
+import json
+from tkinter import Tk, filedialog
 
 import pygame
 from pygame import *
 
-#from buttons import *
-
 pygame.init()
-
-screenSize = (950, 700)  #Definiendo tamaño de ventana
-tipografia = font.SysFont("Helvetica", 30, bold=True)  #Tipografía
+screenSize = (950, 700)  # Definiendo tamaño de ventana
 clock=pygame.time.Clock()
 
-#-------------ventana principal del editor---------------------
-screen = pygame.display.set_mode(screenSize)  #Creando Ventana
-fondoVentanaPrincipal = pygame.image.load("Imagenes//PICSART Fondo.png")  #Agregando fondo de pantalla principal
-screen.blit(fondoVentanaPrincipal, (0, 0))  #Visualizar el fondo
+#------------- Ventana principal del editor ---------------------
+screen = pygame.display.set_mode(screenSize)  # Creando Ventana
 
-# ---- Botón para comenzar con el editor ----
-botonInicio = pygame.image.load("Imagenes//BotonInicio.png")
-botonInicio = pygame.transform.scale(botonInicio, (350, 350))
-posicionBotonInicio = screen.blit(botonInicio, (320, 335))
-
-#================================Creacion del editor==================
+#----- Clase editor---------
 class Editor():
-      def __init__(self, pixels) -> None:
-            self.matrix=[[pixels for _ in range(pixels)] for _ in range(pixels)]
-
-#=================creacion de los botones====================
-class Buttons():
-      def __init__(self, x, y, width, height, color) -> None:
-            self.x = x
-            self.y = y
-            self.width = width
-            self.height = height
-            self.color = color
-
-
-      def drawButtons(self, screen):
-            pygame.draw.rect(screen, self.x, self.y, self.width, self.height)
+      #------- Atributos generales -------
+      def __init__(self, ventana, num_celdas, tamaño_celda, colores, size_screen, posiciones_colores):
+            self.ventana = ventana
+            self.num_celdas = num_celdas
+            self.tamaño_celda = tamaño_celda
+            self.colores = colores
+            self.size_screen = size_screen
+            self.posiciones_colores = posiciones_colores
+            self.offset_x = (size_screen[0] - num_celdas * tamaño_celda) // 1.7
+            self.offset_y = (size_screen[1] - num_celdas * tamaño_celda) // 2
+            self.color_blanco = 10  # Índice del color blanco en la lista colores
+            self.matrix = [[self.color_blanco for _ in range(num_celdas)] for _ in range(num_celdas)]
+            self.color_seleccionado = self.color_blanco
+            self.matrices_guardadas = []
             
-
-            botonRegreso = pygame.image.load("Imagenes//BotonRegreso.png")  #Agregando Imagen representativa de botón de regreso
-            botonRegreso = pygame.transform.scale(botonRegreso, (40, 40))  #Ajustando el tamaño
-            posicionBotonRegreso = screen.blit(botonRegreso, (10, 10))  #Visualizar la imagen con su posición
-            # # ---- Botón de Regreso ----
-            # botonRegreso = pygame.image.load("Imagenes//BotonRegreso.png")  #Agregando Imagen representativa de botón de regreso
-            # botonRegreso = pygame.transform.scale(botonRegreso, (40, 40))  #Ajustando el tamaño
-            # posicionBotonRegreso = screen.blit(botonRegreso, (10, 10))  #Visualizar la imagen con su posición
-
-            # # ---- Botón de Rotación ----
-            # botonRotar = pygame.image.load("Imagenes//rotacion.png")  #Agregando Imagen representativa de botón de rotación
-            # botonRotar = pygame.transform.scale(botonRotar, (45, 45))  #Ajustando el tamaño
-            # posicionBotonRotar = screen.blit(botonRotar, (98, 210))  #Visualizar la imagen con su posición
+      # ------ Metodo para dibujar la cuadricula ----
+      def dibujar_cuadricula(self):
+            for i in range(self.num_celdas):
+                  for j in range(self.num_celdas):
+                        x1 = self.offset_x + i * self.tamaño_celda
+                        y1 = self.offset_y + j * self.tamaño_celda
+                        color = self.colores[self.matrix[i][j]]
+                        pygame.draw.rect(self.ventana, color, (x1, y1, self.tamaño_celda, self.tamaño_celda))
+                        pygame.draw.rect(self.ventana, (0,0,0), (x1, y1, self.tamaño_celda, self.tamaño_celda), 1)
       
-      def clicked(self, position):
-            x, y = position
+      # ------ Metodo para actualizar/pintar el color ----
+      def actualizar_color_cuadricula(self):
+            pos= pygame.mouse.get_pos()
+            x, y = pos[0], pos[1]
+            if self.offset_x <= x < (self.offset_x + self.num_celdas * self.tamaño_celda) and self.offset_y <= y < (self.offset_y + self.num_celdas * self.tamaño_celda):
+                  celda_x = int((x - self.offset_x) // self.tamaño_celda)
+                  celda_y = int((y - self.offset_y) // self.tamaño_celda)
+                  self.matrix[celda_x][celda_y] = self.color_seleccionado
+            for i, pos in enumerate(self.posiciones_colores):
+                  if pos[0] <= x < pos[0] + 40 and pos[1] <= y < pos[1] + 40:
+                        self.color_seleccionado = i
 
-            if not (x>=self.x and x<=self.x+self.width):
-                  return False
-            if not (y>=self.y and y<=self.y+self.height):
-                  return False
-            return True
-
-
-buttons=[
-      Buttons(100, 50, 50, 50, pygame.Color("#E6E3E3"))
-]
-
-
-
-def draw(screen):
-      screen.fill("#FFFFFF")
+      # ------ Metodos para rotar la imagen ----
+      def rotar_Derecha(self):
+            self.matrix = [list(reversed(col)) for col in zip(*self.matrix)]
+            return self.matrix
 
 
-def dibujar_paleta(ventana, colores, posiciones):
-            for i, (color, pos) in enumerate(zip(colores, posiciones)):
-                  pygame.draw.rect(ventana, color, (*pos, 40, 40))
-                  if (i == color_seleccionado):
-                        pygame.draw.rect(ventana, pygame.Color("#000000"), (*pos, 40, 40), 2)
+      def rotar_Izquierda(self):
+            self.rotar_Derecha()
+            self.rotar_Derecha()
+            self.rotar_Derecha()
+            return self.matrix
+      
+
+      def rotar_InvHor(self):
+            self.matrix = self.matrix[::-1]  # Inviertiendo las filas para obtener el orden al revés
+            return self.matrix
+      
+
+      def rotar_InvVert(self):
+            self.rotar_Derecha()
+            self.rotar_Derecha()
+            return self.matrix
+      
+      # ------ Metodos para cambiar color de la imagen ----
+      def alto_contraste(self):
+            for i in range(self.num_celdas):
+                  for j in range(self.num_celdas):
+                        color_actual = self.matrix[i][j]
+                        # ---- Verificando si el color actual está en el rango del alto contraste (índices 0-4) ----
+                        if color_actual in range(5):
+                              self.matrix[i][j] = 0  # Si está en el rango, convertirlo al color del índice 0
+                        # ---- Verificar si el color actual está en el rango del alto contraste (índices 5-9) ----
+                        elif color_actual in range(5, 10):  # Si está en el rango, convertirlo al color del índice 9
+                              self.matrix[i][j] = 9
+            return self.matrix
+      
+
+      def negativo(self):
+            for i in range(self.num_celdas):
+                  for j in range(self.num_celdas):
+                        color_actual = self.matrix[i][j]
+                        if self.colores[color_actual] in self.colores[:10] and not self.colores[color_actual] == self.colores[0]:
+                              indice_invertido = 9 - color_actual
+                              self.matrix[i][j] = indice_invertido
+
+      # ------ Metodos para borrar/limpiar matriz -----
+      def limpiar_cuadricula(self):
+            self.matrix = [[self.color_blanco for _ in range(self.num_celdas)] for _ in range(self.num_celdas)]
+      
+
+      def borrar(self):
+            self.color_seleccionado = 10
+
+      # ------ Metodos para hacer zoom -----
+      def zoomIn(self):
+            self.tamaño_celda *= 1.1
 
 
-# ---- Función para dibujar la cuadrícula ----
-def dibujar_cuadricula(ventana, num_celdas, tamaño_celda, offset_x, offset_y, colores_celdas):
-      for i in range(num_celdas):
-            for j in range(num_celdas):
-                  x1 = offset_x + i * tamaño_celda
-                  y1 = offset_y + j * tamaño_celda
-                  color = colores[colores_celdas[i][j]]
-                  pygame.draw.rect(ventana, color, (x1, y1, tamaño_celda, tamaño_celda))
-                  pygame.draw.rect(ventana, pygame.Color("#000000"), (x1, y1, tamaño_celda, tamaño_celda), 1)
+      def zoomOut(self):
+            self.tamaño_celda *= (10/11)
 
-num_celdas = 80
-tamaño_celda = 8
-offset_x = (screenSize[0] - num_celdas * tamaño_celda) // 2  #Centrar horizontalmente
-offset_y = (screenSize[1] - num_celdas * tamaño_celda) // 2  #Centrar verticalmente
-color_blanco = 0  #Índice del color blanco en la lista colores
-colores_celdas = [[color_blanco for _ in range(num_celdas)] for _ in range(num_celdas)]
+      # ------ Metodos para guardar y abrir imagen -----
+      def guardar(self):
+            root = Tk()
+            root.withdraw()  # Ocultando la ventana principal
+            filepath = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+            if filepath:
+                  with open(filepath, 'w') as file:
+                        json.dump(self.matrix, file)
+                  print(f"Imagen guardada como {filepath}")
+            root.destroy()
 
-# ---- Definiendo colores ----
-colores = [
-      pygame.Color("#E6E3E3"),pygame.Color("#FFE73A"), pygame.Color("#73FF3A"), pygame.Color("#3AFFD8"), pygame.Color("#3A3DFF"),
-      pygame.Color("#943AFF"), pygame.Color("#FF3AC9"), pygame.Color("#FF3A3A"), pygame.Color("#FF9F3A"),
-      pygame.Color("#000000")
-]
-color_seleccionado = 0
-
-# ---- Definiendo posiciones específicas para los colores ----
-posiciones_colores = [
-      (100, 50), (100, 130), (50, 50), (100, 210),
-      (50, 210), (50, 290), (50, 370), (100, 290),
-      (100, 370), (50, 130)
-]
-
-
-
-def main():
-      ventanaPrincipalCorriendo, screenEditorCorriendo = True, False
-      clock.tick(60)
-      while True:
-            for event in pygame.event.get():  #Iterando sobre eventos
-                        if event.type == pygame.QUIT:  #Si el usuario intenta cerrar ventana
-                              pygame.quit()  #Saliendo del juego
-                              sys.exit()
-                        elif event.type == pygame.MOUSEBUTTONDOWN:  # Detectar clic del mouse
-                              if (event.button == 1):  #Verificar si fue clic izquierdo
-                                    x, y = event.pos  #Guardar en variables donde se hizo clic
-                                    print(x,y)
-                              
-            # ---- Bucle de Ventana Principal ----
-            if ventanaPrincipalCorriendo==True:
-                  if event.type == pygame.MOUSEBUTTONDOWN:  #Detectar clic del mouse
-                        if (event.button == 1):  #Verificar si fue clic izquierdo
-                              x, y = event.pos  #Guardando en variables donde se hizo clic
-
-                        #Verificar si el clic fue dentro de alguno de los botones de la Ventana Principal
-                              if posicionBotonInicio.collidepoint(event.pos):
-                                    #Botón de Inicio
-                                    ventanaPrincipalCorriendo = False
-                                    screenEditorCorriendo = True
-                                    print('ventana editor') #Ir a ventana de edición
-            
-            if screenEditorCorriendo:
-                  #Agregando color de fondo
-                  draw(screen)
-                  dibujar_cuadricula(screen, num_celdas, tamaño_celda, offset_x, offset_y, colores_celdas)
-                  # ---- Botón de Regreso ----
-                  botonRegreso = pygame.image.load("Imagenes//BotonRegreso.png")  #Agregando Imagen representativa de botón de regreso
-                  botonRegreso = pygame.transform.scale(botonRegreso, (40, 40))  #Ajustando el tamaño
-                  posicionBotonRegreso = screen.blit(botonRegreso, (10, 10))  #Visualizar la imagen con su posición
-
-                  # ---- Botón de Rotación Derecha ----
-                  botonRotarDer = pygame.image.load("Imagenes//rot-der.png")  # Agregando Imagen representativa de botón de rotación
-                  botonRotarDer = pygame.transform.scale(botonRotarDer, (45, 45))  # Ajustando el tamaño
-                  posicionBotonRotarDerecha = screen.blit(botonRotarDer, (50, 450))  # Visualizar la imagen con su posición
-                  #dibujar_paleta(screen,colores,posiciones_colores )
-                  
-                  # ---- Botón de Rotación Izquierda ----
-                  botonRotarIz = pygame.image.load("Imagenes//rot-iz.png")  # Agregando Imagen representativa de botón de rotación
-                  botonRotarIz = pygame.transform.scale(botonRotarIz, (45, 45))  # Ajustando el tamaño
-                  posicionBotonRotarIzquierda = screen.blit(botonRotarIz, (100, 450))  # Visualizar la imagen con su posición
-
-            pygame.display.flip()
-
-
-main()
+      def abrirImagen(self):
+            root = Tk()
+            root.withdraw()  # Ocultando la ventana principal
+            filepath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
+            if filepath:
+                  try:
+                        with open(filepath, 'r') as file:
+                              self.matrix = json.load(file)
+                        print(f"Imagen cargada desde {filepath}")
+                  except FileNotFoundError:
+                        print("No se encontró el archivo.")
+                  except json.JSONDecodeError:
+                        print("Error al decodificar el archivo.")
+            root.destroy()
